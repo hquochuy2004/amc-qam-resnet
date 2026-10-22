@@ -1,0 +1,66 @@
+# EE136IU Topic 5: Basic 1D CNN vs 1D ResNet for dense QAM
+# Locked at kickoff 2026-10-20. Change only with team agreement and note it in README.
+
+seed: 42                      # global seed (torch, numpy, python)
+
+data:
+  classes: [BPSK, QPSK, 8PSK, 16QAM, 64QAM, PAM4, CPFSK, GFSK]   # 8 classes, 4 families
+  burst_len: 128              # L samples per burst -> tensor [N, 2, 128]
+  sps: 4                      # samples per symbol -> 32 symbols per burst
+  rrc_rolloff: 0.35           # root-raised-cosine pulse shaping (linear mods)
+  rrc_span: 8                 # filter span in symbols
+  fsk_mod_index: 0.5          # CPFSK / GFSK modulation index h
+  gfsk_bt: 0.3                # GFSK Gaussian BT product
+  snr_db: [-10, -8, -6, -4, -2, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18]  # 15-point grid
+  phase_offset: uniform_2pi   # phi ~ U[0, 2pi) per burst
+  cfo_max: 0.004              # |delta f| <= 0.4% of fs (nominal channel)
+  normalize: rms              # r_norm[n] = r[n] / E_rms, per burst
+  bursts_per_class_snr:       # 1000 per (class, SNR) -> 120k bursts total
+    train: 700
+    val: 150
+    test: 150
+  split_seeds:                # disjoint RNG streams per split = no shared channel instance
+    train: 1000
+    val: 2000
+    test: 3000
+  out_dir: data
+
+models:
+  target_params: 150000       # all three models within +-10% of this
+  cnn_base:
+    channels: [64, 128, 128, 160]    # 154.7k params
+    kernels: [7, 5, 3, 3]
+  cnn_plain_deep:             # same depth/layout as resnet1d, skip connections removed: 144.6k params
+    stem_channels: 32
+    stage_channels: [32, 64, 88]
+    units_per_stage: 2
+  resnet1d:                   # 152.6k params (extra 8k = 1x1 projection shortcuts)
+    stem_channels: 32
+    stage_channels: [32, 64, 88]
+    units_per_stage: 2
+  dropout: 0.3
+
+train:
+  model_seeds: [0, 1, 2]      # 3 runs per model, report mean +- std
+  batch_size: 256
+  epochs: 40
+  optimizer: adam
+  lr: 0.001
+  weight_decay: 0.0001
+  scheduler: reduce_on_plateau  # factor 0.5, patience 3 on val loss
+  num_workers: 2
+  early_stop_patience: 6
+  device: auto                # cuda if available else cpu
+  ckpt_dir: checkpoints
+
+eval:
+  cm_snrs: [-4, 4, 14]        # row-normalized confusion matrices
+  qam_pair: [16QAM, 64QAM]
+  qam_high_snr_min: 10        # sub-block pooled over SNR >= +10 dB
+  qam_curve_snr_min: 8        # confusion-rate curve from +8 dB
+  latency_bursts: 1000
+  results_dir: results
+
+quick:                        # `python run_all.py --quick`: must finish < 30 s
+  bursts_per_class_snr: 20
+  use_pretrained: true

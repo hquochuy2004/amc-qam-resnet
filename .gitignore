@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+data/*.npz
+results/*.csv
+!results/figures/.gitkeep
+.DS_Store
+Thumbs.db
+results/predictions_*.npz
