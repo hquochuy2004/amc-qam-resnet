@@ -18,7 +18,7 @@ python -m dataset.generator      # writes data/{train,val,test}.npz (~5 s)
 python -m pytest -q              # shape, RMS = 1, no leakage between splits
 python -m dataset.sanity_plots   # constellations, measured SNR, C42 -> results/figures
 python train.py --model resnet1d --seed 0   # one run
-python train.py --all                       # 3 models x 3 seeds (see kaggle/HUONG_DAN_KAGGLE.md)
+python train.py --all                       # 3 models x 3 seeds
 python evaluate.py               # acc/F1 vs SNR, confusion matrices, QAM sub-block, McNemar -> results/
 ```
 
@@ -48,7 +48,6 @@ python evaluate.py               # acc/F1 vs SNR, confusion matrices, QAM sub-bl
 | `results/` | Figures and CSV tables |
 | `checkpoints/` | Best checkpoint per model and seed |
 | `tests/` | Shape, RMS, no-leakage and matched-parameter checks |
-| `kaggle/` | How to run the training on a Kaggle GPU |
 
 ## Setup locked in config.yaml
 
