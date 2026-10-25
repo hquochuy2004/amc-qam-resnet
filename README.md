@@ -7,8 +7,8 @@ EE136IU Capstone Mini-Project, Topic 5. Can residual connections (y = F(x) + x) 
 
 ```bash
 pip install -r requirements.txt
-python run_all.py --quick        # small dataset + pretrained checkpoints + eval, < 30 s
-streamlit run demo/app.py        # QAM Test Bench
+python run_all.py --quick        # smoke test: tiny dataset, 1 epoch per model in a temp folder (< 1 min, CPU)
+streamlit run demo/app.py        # QAM Test Bench, uses the trained checkpoints in checkpoints/
 ```
 
 Full pipeline:
@@ -21,6 +21,20 @@ python train.py --model resnet1d --seed 0   # one run
 python train.py --all                       # 3 models x 3 seeds (see kaggle/HUONG_DAN_KAGGLE.md)
 python evaluate.py               # acc/F1 vs SNR, confusion matrices, QAM sub-block, McNemar -> results/
 ```
+
+## Results (test set, mean ± std over 3 seeds)
+
+| Model | Params | Acc, all SNR | Macro-F1 | Acc, SNR ≥ 10 dB | CPU latency / burst |
+| --- | --- | --- | --- | --- | --- |
+| CNN-Base | 154.7k | 67.1 ± 0.7 % | 0.665 | 88.7 ± 0.7 % | 0.77 ms |
+| CNN-Deep-Plain | 144.6k | 69.3 ± 0.5 % | 0.688 | 94.6 ± 1.7 % | 1.59 ms |
+| ResNet1D | 152.6k | 68.8 ± 0.4 % | 0.684 | 94.1 ± 1.8 % | 1.84 ms |
+
+- Depth helps: both deep models beat CNN-Base on every seed (McNemar p < 1e-15). The whole gap is 16QAM vs 64QAM.
+- Skip connections give no stable gain at this depth: ResNet1D vs CNN-Deep-Plain changes direction between seeds.
+- Training ran on a Kaggle GPU; the 9 best checkpoints are in `checkpoints/`, tables in `results/*.csv`,
+  per-epoch logs in `results/logs/`, figures in `results/figures/`.
+  `results/predictions_*.npz` are not committed; `python -m dataset.generator` then `python evaluate.py` regenerate them.
 
 ## Layout
 

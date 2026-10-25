@@ -1,0 +1,7 @@
+seed,vs,resnet_right_other_wrong,resnet_wrong_other_right,p_value
+0,cnn_base,470,111,1.630433621560013e-53
+1,cnn_base,461,113,8.02066453698682e-51
+2,cnn_base,349,169,1.936663028015832e-15
+0,cnn_plain_deep,274,138,1.9260769049461156e-11
+1,cnn_plain_deep,154,148,0.7736189005220147
+2,cnn_plain_deep,128,357,4.624794754583184e-26
